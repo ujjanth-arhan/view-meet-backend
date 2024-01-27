@@ -8,6 +8,8 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+var clients map[*websocket.Conn]*websocket.Conn = make(map[*websocket.Conn]*websocket.Conn)
+
 func main() {
 	port := 8080
 	http.HandleFunc("/", handleConnection)
@@ -27,19 +29,23 @@ func handleConnection(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	defer c.Close()
-
+	clients[c] = c
 	for {
 		mt, message, err := c.ReadMessage()
 		if err != nil {
 			fmt.Println("Error reading data: ", err)
-			break
+			delete(clients, c)
+			return
 		}
-
 		fmt.Println("Message from client: ", message)
-		if err := c.WriteMessage(mt, message); err != nil {
-			log.Printf("Writing error: %#v\n", err)
-			break
+		for _, con := range clients {
+			if con == c {
+				continue
+			}
+			if err := con.WriteMessage(mt, message); err != nil {
+				log.Printf("Writing error: %#v\n", err)
+				break
+			}
 		}
 	}
 }
