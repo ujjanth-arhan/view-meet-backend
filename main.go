@@ -12,15 +12,21 @@ var clients map[*websocket.Conn]*websocket.Conn = make(map[*websocket.Conn]*webs
 
 func main() {
 	port := 8080
+	http.HandleFunc("/health", healthCheck)
 	http.HandleFunc("/", handleConnection)
+	fmt.Printf("Starting application on port :%d\n", port)
 	if err := http.ListenAndServe(fmt.Sprintf(":%d", port), nil); err != nil {
 		fmt.Println("Error while starting to listen: ", err)
 	}
 }
 
+func healthCheck(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("Up and running!"))
+}
+
 func handleConnection(w http.ResponseWriter, r *http.Request) {
 	/**
-	Custom check origin function to bypass gorilla check origin which prevents it from running on local host
+	Custom check origin function to bypass gorilla check origin which prevents it from running on localhost
 	*/
 	upgrader := websocket.Upgrader{CheckOrigin: func(r *http.Request) bool { return true }}
 	c, err := upgrader.Upgrade(w, r, nil)
