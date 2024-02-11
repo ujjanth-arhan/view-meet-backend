@@ -8,6 +8,13 @@
 Install docker https://docs.docker.com/get-docker/<br>
 (tested on Docker Desktop 4.27.2 (137060))
 
+Clone the repository<br>
+**OR**<br>
+Pull the docker image
+```docker
+docker pull ujjanth/view-meet-backend:latest
+```
+
 Execute the following in `view-meet-backend/`
 ```docker
 docker build -t view-meet-backend .
